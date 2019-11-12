@@ -40,5 +40,24 @@ primes_over(N, C) ->
         {1, true} -> [N];
         {C, true} -> [N| primes_over(N+2,C-1)];
         _Else -> primes_over(N+2, C)
-    end
-.
+    end .
+
+sum(Term, A, Next, B)->
+    sum(Term, A, Next, B, 0);
+sum(Term, A, Next, B, Result) ->
+    if A>B ->
+            Result;
+       true ->
+            sum(Term, Next(A), Next, B, Result+Term(A)).
+
+integral(F,A,B,N)->
+    h=(B-A)/N,
+    Coef=fun(k) when k==0->1;
+            (k) when k==N->1;
+            (k) when k rem 2==0 -> 4;
+            (k) -> 2
+         end,
+    TermFn=fun(k)-> F(A+k*h)*Coef(k)
+           end,
+    sum(TermFn, 0, fun(X)->X+1 end, N).
+
