@@ -1,5 +1,5 @@
 -module(sicp).
--export([fact/1, min_divisor/1, is_prime/1, primes_over/2]).
+-export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4]).
 
 fact(1)->
     1;
@@ -42,22 +42,24 @@ primes_over(N, C) ->
         _Else -> primes_over(N+2, C)
     end .
 
-sum(Term, A, Next, B)->
-    sum(Term, A, Next, B, 0);
+sum(Term, A, Next, B) ->
+    sum(Term, A, Next, B, 0).
+
 sum(Term, A, Next, B, Result) ->
     if A>B ->
             Result;
        true ->
-            sum(Term, Next(A), Next, B, Result+Term(A)).
+            sum(Term, Next(A), Next, B, Result+Term(A))
+    end.
 
 integral(F,A,B,N)->
-    h=(B-A)/N,
-    Coef=fun(k) when k==0->1;
-            (k) when k==N->1;
-            (k) when k rem 2==0 -> 4;
-            (k) -> 2
+    H=(B-A)/N,
+    Coef=fun(0) ->1;
+            (K) when K==N->1;
+            (K) -> if (K rem 2)==0 -> 4;
+                      true -> 2
+                   end
          end,
-    TermFn=fun(k)-> F(A+k*h)*Coef(k)
+    TermFn=fun(K)-> F(A+K*H)*Coef(K)
            end,
-    sum(TermFn, 0, fun(X)->X+1 end, N).
-
+    H/3 * sum(TermFn, 0, fun(X)->X+1 end, N).
