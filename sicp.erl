@@ -32,9 +32,6 @@ timed_prime(N,Start) ->
             false
     end.
 
-
-                      
-
 primes_over(N, C) when N rem 2 ==0 ->
     primes_over(N+1,C);
 
@@ -45,8 +42,3 @@ primes_over(N, C) ->
         _Else -> primes_over(N+2, C)
     end
 .
-
-
-
-
-

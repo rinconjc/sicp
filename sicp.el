@@ -41,7 +41,7 @@
 
 (defun print-elapsed (start end)
   (message "elapsed: %s" (float-time
-                       (time-subtract end start))))
+                          (time-subtract end start))))
 
 (defun timed-prime? (n)
   (defun find-prime (n start)
@@ -61,23 +61,26 @@
 ;; (search-primes 10001 3)
 ;; (search-primes 100001 3)
 
-(defun integral (f a b n)
-  (defun eval (h) 
-    (defun hk (k)
-      (let ((x (+ a (* k h))))
-        (funcall f 'x )))
-    (defun sum-int (s k)
-      (cond
-       ((= k n) (+ s (hk k)))
-       ((= k 0) (sum-int (+ s (hk k)) (+ k 1)))
-       ((= 0 (mod k 2)) (sum-int (+ s (* 2 (hk k))) (+ k 1)))
-       (t (sum-int (+ s (* 4 (hk k))) (+ k 1)))))
-    (/ (* h (sum-int 0 0)) 3))
-  (eval (/ (- b a) n)))
+(defun fx-integral (f a b n)
+  (let ((h (/ (- b a) n)))
+    (let ((hk (lambda (k)
+                (funcall f (+ a (* k h)))))
+          (sum-int (lambda (s k)
+                     (cond
+                      ((= k n) (+ s (funcall hk k)))
+                      ((= k 0) (funcall sum-int (+ s (funcall hk k)) (+ k 1)))
+                      ((= 0 (mod k 2)) (funcall sum-int (+ s (* 2 (funcall hk k))) (+ k 1)))
+                      (t (funcall sum-int (+ s (* 4 (funcall hk k))) (+ k 1)))))))
+      (/ (* h (funcall sum-int 0 0)) 3))))
 
-(defun cube (x) (* x x x) )
+(defun cube (x)
+  (* x x x))
 
-(message "integral cube: %s" (integral 'cube 0 1 100)),
- 
- 
+(message "integral cube: %s" (fx-integral 'cube 0 1.0 100))
+
+(let ((a (+ 1 2))) (let ((b (* 3 a))) (+ a b)))
 (funcall '+ 2 3)
+
+(cube 2)
+(let ((a 3) (f 'cube)) (funcall f (+ a 2)))
+(/ 1.0 100)
