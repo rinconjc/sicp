@@ -1,5 +1,5 @@
 -module(sicp).
--export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4]).
+-export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4, cont_frac/3]).
 
 fact(1)->
     1;
@@ -63,3 +63,17 @@ integral(F,A,B,N)->
     TermFn=fun(K)-> F(A+K*H)*Coef(K)
            end,
     H/3 * sum(TermFn, 0, fun(X)->X+1 end, N).
+
+
+cont_frac(N,D,K)->
+    cont_frac(N,D,K,K,0).
+
+cont_frac(N,D,K,I,R)-> 
+    if I==0 ->
+            R;
+       true ->
+            cont_frac(N,D,K,I-1,N(I)/(D(I)+R))
+    end.
+
+
+ 
