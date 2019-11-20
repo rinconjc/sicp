@@ -1,5 +1,6 @@
 -module(sicp).
--export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4, cont_frac/3]).
+-export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4, cont_frac/3, euler_e/1, tan_cf/2, fixed_point/2, newtons_method/2, cubic/3]).
+-define(TOLERANCE, 0.000001).
 
 fact(1)->
     1;
@@ -69,11 +70,58 @@ cont_frac(N,D,K)->
     cont_frac(N,D,K,K,0).
 
 cont_frac(N,D,K,I,R)-> 
-    if I==0 ->
+    if I==1 ->
             R;
        true ->
             cont_frac(N,D,K,I-1,N(I)/(D(I)+R))
     end.
 
 
- 
+euler_e(K)->
+    cont_frac(fun(_)->1.0 end,
+              fun(X)->if (X-2) rem 3 == 0 ->
+                              2+2*(X-2) div 3;
+                         true -> 1 end
+                      end,
+              K).
+
+tan_cf(X,K)->
+    cont_frac(fun(I)-> 
+                     if I>1 -> X*X;
+                        true -> X end
+                     end,
+             fun(I)-> 2*I-1 end,
+             K).
+
+
+
+fixed_point(F,Guess)->
+    Is_close_enough=fun(V1,V2)-> abs(V1-V2)<?TOLERANCE end,
+    Try=fun(Try,G)->
+                N=F(G),
+                case Is_close_enough(N,G) of
+                    true ->
+                        G;
+                    false ->
+                        Try(Try,N)
+                end
+        end,
+    Try(Try, Guess).
+
+deriv(G)->
+    DX=0.000001,
+    fun(X)-> (G(X+DX)-G(X))/DX end.
+
+newton_transform(G)->
+    fun(X)-> X-G(X)/((deriv(G))(X)) end.
+
+newtons_method(F, Guess)->
+    fixed_point(newton_transform(F), Guess).
+
+cubic(A,B,C)->
+    fun(X)-> X*X*X+A*X*X+B*X+C end.
+
+
+
+
+
