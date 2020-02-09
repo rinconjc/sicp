@@ -1,5 +1,8 @@
 -module(sicp).
--export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4, cont_frac/3, euler_e/1, tan_cf/2, fixed_point/2, newtons_method/2, cubic/3]).
+-export([fact/1, min_divisor/1, is_prime/1, primes_over/2, integral/4, sum/4, cont_frac/3, euler_e/1, tan_cf/2, fixed_point/2, newtons_method/2, cubic/3, compose/2, repeated/2,
+smoothed/1, cons/2, car/1, cdr/1, mk_interval/2, add_interval/2,
+sub_interval/2, mul_interval/2, div_interval/2,
+reverse/1, pairs/1, queens/1]).
 -define(TOLERANCE, 0.000001).
 
 fact(1)->
@@ -76,7 +79,6 @@ cont_frac(N,D,K,I,R)->
             cont_frac(N,D,K,I-1,N(I)/(D(I)+R))
     end.
 
-
 euler_e(K)->
     cont_frac(fun(_)->1.0 end,
               fun(X)->if (X-2) rem 3 == 0 ->
@@ -92,8 +94,6 @@ tan_cf(X,K)->
                      end,
              fun(I)-> 2*I-1 end,
              K).
-
-
 
 fixed_point(F,Guess)->
     Is_close_enough=fun(V1,V2)-> abs(V1-V2)<?TOLERANCE end,
@@ -121,7 +121,106 @@ newtons_method(F, Guess)->
 cubic(A,B,C)->
     fun(X)-> X*X*X+A*X*X+B*X+C end.
 
+compose(F,G)->
+    fun(X)-> F(G(X)) end.
+
+repeated(F,N)->
+    if N=<1 ->
+            F;
+       true ->
+            compose(F,repeated(F,N-1))
+    end.
+
+smoothed(F)->
+    DX=0.0001,
+    fun(X)-> (F(X)+F(X-DX)+F(X+DX))/3 end.
+
+cons(X,Y)->
+    fun(F)->
+            F(X,Y)
+    end.
+
+car(Z)->
+    Z(fun(P,_)->P end).
+
+cdr(Z)->
+    Z(fun(_,Q)->Q end).
+
+mk_interval(X,Y)->
+    [X,Y].
+
+upper_bound([_,Y])->
+    Y.
+lower_bound([X,_])->
+    X.
+
+add_interval(A,B)->
+    mk_interval(lower_bound(A)+lower_bound(B),
+                upper_bound(A)+upper_bound(B)).
+
+mul_interval(A,B)->
+    P1=lower_bound(A)*lower_bound(B),
+    P2=lower_bound(A)*upper_bound(B),
+    P3=upper_bound(A)*lower_bound(B),
+    P4=upper_bound(A)*upper_bound(B),
+    mk_interval(lists:min([P1,P2,P3,P4]), lists:max([P1,P2,P3,P4])).
+
+div_interval(A,B)->
+    mul_interval(A,mk_interval(1/upper_bound(B),1/lower_bound(B))).
+sub_interval(A,B)->
+    mk_interval(lower_bound(A)-upper_bound(B),
+                 upper_bound(A)-lower_bound(B)).
+
+mk_center_width(C,W)->    
+    mk_interval(C-W,C+W).
+
+reverse(R,[])->
+    R;
+reverse(R,[H|T]) ->
+   reverse([H|R],T).
+
+reverse(L)->
+    reverse([], L).
 
 
+   
+pairs(N)->
+    lists:flatmap(fun(I)->
+                          lists:map(fun(J)->[I,J] end, 
+                                    lists:seq(1,I)) end,lists:seq(1,N+1)).
 
+empty_board()->
+    [].
+
+adjoin_pos(R, K, RestQs)->
+    [[K,R]|RestQs].
+
+safe_pos([[K,R]|Ps], K)->
+    lists:all(
+      fun([J,M])-> (M /= R) and ((K-J) /= abs(R-M))
+      end,
+      Ps).
+
+queens(BoardSize)->
+    QueenCols=
+        fun(K, QC)->
+                if K==0 ->
+                        [empty_board()];
+                   true ->
+                        lists:filter(
+                          fun(Ps)->
+                                  safe_pos(Ps, K)
+                          end,
+                          lists:flatmap(
+                            fun(RestQs)->
+                                    lists:map(
+                                      fun(NewRow)->
+                                              adjoin_pos(NewRow, K, RestQs)
+                                      end,
+                                      lists:seq(1, BoardSize))
+                            end,
+                            QC(K-1, QC))) 
+                   end
+        end,
+    QueenCols(BoardSize, QueenCols).
 

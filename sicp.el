@@ -84,3 +84,6 @@
 (cube 2)
 (let ((a 3) (f 'cube)) (funcall f (+ a 2)))
 (/ 1.0 100)
+
+(defun fold-right (op initial sequence)
+  (if (nil-p sequence)))
